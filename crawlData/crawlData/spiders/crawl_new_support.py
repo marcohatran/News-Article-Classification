@@ -7,10 +7,11 @@ thanhnien_categories = ['thoi-su', 'the-gioi', 'tai-chinh-kinh-doanh', 'doi-song
     # done: ['thoi-su']
 vnexpress_categories = ['the-gioi', 'phap-luat' ,'giao-duc' , 'khoa-hoc','oto-xe-may' , 'y-kien' ,'tam-su',  'cuoi', 'kinh-doanh', 'giai-tri', 'the-thao', 'suc-khoe', 'doi-song', 'du-lich']
     # cong-nghe, du-lich, the-thao
-tuoitre_categories = ['thoi-su', 'the-gioi', 'phap-luat', 'kinh-doanh', 'xe', 'nhip-song-tre', 'van-hoa', 'giai-tri', 'giao-duc', 'khoa-hoc', 'suc-khoe', 'gia-that', 'ban-doc-lam-bao']
+tuoitre_categories = ['the-gioi', 'phap-luat', 'kinh-doanh', 'xe', 'nhip-song-tre', 'van-hoa', 'giai-tri', 'giao-duc', 'khoa-hoc', 'suc-khoe', 'gia-that', 'ban-doc-lam-bao']
     # du-lich
 dantri_categories = ['su-kien', 'xa-hoi', 'the-gioi', 'the-thao', 'giao-duc-khuyen-hoc', 'tam-long-nhan-ai', 'kinh-doanh', 'bat-dong-san', 'van-hoa', 'giai-tri', 'phap-luat', 'nhip-song-tre', 'suc-khoe', 'suc-manh-so', 'o-to-xe-may', 'tinh-yeu-gioi-tinh']
-vietnamnet_categories = ['thoi-su/chinh-tri/', 'talkshow', 'thoi-su', 'kinh-doanh', 'giai-tri', 'the-gioi', 'giao-duc', 'doi-song', 'phap-luat', 'the-thao', 'cong-nghe', 'suc-khoe', 'bat-dong-san', 'ban-doc', 'tuanvietnam', 'oto-xe-may']
+vietnamnet_categories = ['thoi-su-chinh-tri', 'talkshow', 'thoi-su', 'kinh-doanh', 'giai-tri', 'the-gioi', 'giao-duc', 'doi-song', 'phap-luat', 'the-thao', 'cong-nghe', 'suc-khoe', 'bat-dong-san', 'ban-doc', 'tuanvietnam', 'oto-xe-may']
+
 laodong_categories = ['thoi-su', 'cong-doan', 'the-gioi', 'xa-hoi', 'phap-luat', 'kinh-te', 'bat-dong-san', 'van-hoa-giai-tri', 'the-thao', 'xe', 'suc-khoe', 'ban-doc', 'tam-long-vang']
 nhandan_categories = ['chinhtri', 'kinhte', 'vanhoa', 'xahoi', 'phapluat', 'du-lich', 'thegioi', 'thethao', 'giaoduc', 'y-te', 'khoahoc-congnghe', 'bandoc']
 doisongvaphapluat_categories = ['phap-luat', 'kinh-doanh', 'doi-song', 'giao-duc', 'giai-tri', 'the-thao', 'cong-nghe']
@@ -73,6 +74,8 @@ def write_log(name, category, string):
     else:
         # construct filename of the text
         text_file = "data" + "\\" + dt + "\\" + name + "\\" + category + ".txt"
+        text_file = text_file.replace('/', '-')
+        # print(text_file)
         # mode a means inserted data at the end of the file 
         # create the file if it is not exist 
         # save to txt file
@@ -89,5 +92,25 @@ def getStatsLocal():
 def getStatsGlobal():
     return
 
+def createSpider(class_name, newspaper_name, nums_of_spiders, url, extra_url=''):
+    # Create classes
+    for num in range(1, nums_of_spiders):
+        print("class {}Spider{}({}Spider):".format(class_name, num, class_name))
+        print("\tcategory = newspaper_data['{}'][{}]".format(newspaper_name, num))
+        print("\tname = '{}{}'".format(newspaper_name, num))
+        print("\tstart_urls = ['{}' + category + '{}']".format(url, extra_url))
+        print("\n")
+    # Create processes
+    print("process = CrawlerProcess()")
+    print('process.crawl({}Spider)'.format(class_name))
+    for num in range(1, nums_of_spiders):
+        print('process.crawl({}Spider{})'.format(class_name, num))
+    print('process.start()')
+    return
+
+def write_status(category, log_status):
+    file = open(category + 'status.txt', 'a', encoding='utf-8')
+    file.write(log_status+'\n')
+    file.close()
 
 createDataStructure()

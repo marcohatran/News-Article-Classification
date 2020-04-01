@@ -1,7 +1,14 @@
 import scrapy 
 import os
 import re
-from data_support import write_log, newspaper_data
+try:    
+    from crawl_new_support import write_log, newspaper_data, createSpider
+except:
+    pass
+try:
+    from crawlData.spiders.crawl_new_support import write_log, newspaper_data, createSpider
+except:
+    pass
 from scrapy.crawler import CrawlerProcess
 
 crawl_newspaper = 'thanhnien'
@@ -156,4 +163,3 @@ process.crawl(ThanhNienSpider6)
 process.crawl(ThanhNienSpider7)
 process.crawl(ThanhNienSpider8)
 process.crawl(ThanhNienSpider9)
-process.start()

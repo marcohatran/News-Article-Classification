@@ -1,7 +1,14 @@
 import scrapy 
 import os
 import re
-from crawlData.spiders.data_support import write_log, newspaper_data
+try:    
+    from crawl_new_support import write_log, newspaper_data, createSpider
+except:
+    pass
+try:
+    from crawlData.spiders.crawl_new_support import write_log, newspaper_data, createSpider
+except:
+    pass
 
 crawl_newspaper = 'vnexpress'
 
