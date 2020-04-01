@@ -1,7 +1,7 @@
 import scrapy 
 import os
 import re
-from crawlData.spiders.data_support import write_log, newspaper_data
+from data_support import write_log, newspaper_data
 from scrapy.crawler import CrawlerProcess
 
 crawl_newspaper = 'thanhnien'
@@ -9,8 +9,10 @@ crawl_newspaper = 'thanhnien'
 # Thanh nien Online
 class ThanhNienSpider(scrapy.Spider):
     name = 'thanhnien'
-    start_urls = ['https://thanhnien.vn/' + sub_page + '/' for sub_page in newspaper_data[name]]
+    category = newspaper_data['thanhnien'][0]
+    start_urls = ['https://thanhnien.vn/' + category]
     crawled_big_titles = False
+    page_count = 0
     def getCategory(self, url):
         category = str(url).replace('https://thanhnien.vn/', '').replace('/', '')
         category = re.sub('p\d+', '', category)
@@ -22,11 +24,25 @@ class ThanhNienSpider(scrapy.Spider):
 
     def getDescription(self, response):
         description = ''.join(response.css('div.summary ::text').getall())
-        return description
+        return description.rstrip()
 
     def getContentAndSaveData(self, response, category, title, description = ''):
-        content = ''
-        write_log(crawl_newspaper, category, title + description + content)
+        body = response.css("div.l-content")
+        raw_content = body.css("div#abody.cms-body.detail ::text").getall()
+        # no infomation text
+        trash = body.css("div#abody.cms-body.detail").css(".video ::text").getall()
+        trash += body.css("div#abody.cms-body.detail").css("script ::text").getall()
+        trash += body.css("div#abody.cms-body.detail").css("table ::text").getall()
+        clean_text = []
+        for text in raw_content:
+            if text in trash:
+                pass
+            else:
+                clean_text.append(text)
+
+        content = ''.join(clean_text).replace('\r', '')
+        content = re.sub('\n+', '\n', content).strip()
+        write_log(crawl_newspaper, self.category, title + '\n' + description + content)
 
     def parse(self, response):
         category = self.getCategory(response.url)
@@ -35,7 +51,7 @@ class ThanhNienSpider(scrapy.Spider):
         if not self.crawled_big_titles:
             for new in feature.css('article'):
                 title = self.getTitle(new)
-                link_content = new.css("a::atrr(href)").get()
+                link_content = new.css("a::attr(href)").get()
                 if link_content is not None:
                     yield scrapy.Request(
                         response.urljoin(link_content),
@@ -47,13 +63,15 @@ class ThanhNienSpider(scrapy.Spider):
             
         # contains small titles and summary
         relative = response.css('div.relative')
+        # print(len(relative))
 
         # small news title and summary
         for new in relative.css('article.story'):
             title = self.getTitle(new)
             description = self.getDescription(new)
-            link_content = new.css("a::atrr(href)")
+            link_content = new.css("a::attr(href)").get()
             if link_content is not None:
+                
                 yield scrapy.Request(
                     response.urljoin(link_content),
                     callback=self.getContentAndSaveData,
@@ -63,15 +81,79 @@ class ThanhNienSpider(scrapy.Spider):
                 )
 
         # go to next page
-        next_page = response.css('ul.pagination').css('li::atrr(href)').get()
+        next_page = response.css('div.zone--timeline').css('ul').css('li ::attr(href)').getall()
+        # print(next_page)
         if next_page is not None:
-            print(next_page)
+            if self.page_count == 0:
+                next_page = next_page[0]
+                self.page_count += 1
+            elif self.page_count == 1:
+                next_page = next_page[1]
+                self.page_count += 1
+            else:
+                next_page = next_page[2]
+            # print(next_page)
+
             yield scrapy.Request(
-                response.urljoin(link_content),
+                response.urljoin(next_page),
                 callback=self.parse
             )
 print(len(newspaper_data[crawl_newspaper]))
 
-# process = CrawlerProcess()
-# process.crawl(ThanhNienSpider)
-# process.start()
+
+class ThanhNienSpider1(ThanhNienSpider):
+    category = newspaper_data['thanhnien'][1]
+    name = 'thanhnien1' 
+    start_urls = ['https://thanhnien.vn/' + category]
+
+class ThanhNienSpider2(ThanhNienSpider):
+    category = newspaper_data['thanhnien'][2]
+    name = 'thanhnien2' 
+    start_urls = ['https://thanhnien.vn/' + category]
+
+class ThanhNienSpider3(ThanhNienSpider):
+    category = newspaper_data['thanhnien'][3]
+    name = 'thanhnien3' 
+    start_urls = ['https://thanhnien.vn/' + category]
+
+class ThanhNienSpider4(ThanhNienSpider):
+    category = newspaper_data['thanhnien'][4]
+    name = 'thanhnien4' 
+    start_urls = ['https://thanhnien.vn/' + category]
+
+class ThanhNienSpider5(ThanhNienSpider):
+    category = newspaper_data['thanhnien'][5]
+    name = 'thanhnien5' 
+    start_urls = ['https://thanhnien.vn/' + category]
+
+class ThanhNienSpider6(ThanhNienSpider):
+    category = newspaper_data['thanhnien'][6]
+    name = 'thanhnien6' 
+    start_urls = ['https://thanhnien.vn/' + category]
+
+class ThanhNienSpider7(ThanhNienSpider):
+    category = newspaper_data['thanhnien'][7]
+    name = 'thanhnien7' 
+    start_urls = ['https://thanhnien.vn/' + category]
+
+class ThanhNienSpider8(ThanhNienSpider):
+    category = newspaper_data['thanhnien'][8]
+    name = 'thanhnien8' 
+    start_urls = ['https://thanhnien.vn/' + category]
+
+class ThanhNienSpider9(ThanhNienSpider):
+    category = newspaper_data['thanhnien'][9]
+    name = 'thanhnien9' 
+    start_urls = ['https://thanhnien.vn/' + category]
+
+
+process = CrawlerProcess()
+process.crawl(ThanhNienSpider2)
+process.crawl(ThanhNienSpider3)
+process.crawl(ThanhNienSpider4)
+process.crawl(ThanhNienSpider5)
+process.crawl(ThanhNienSpider6)
+process.crawl(ThanhNienSpider7)
+process.crawl(ThanhNienSpider8)
+process.crawl(ThanhNienSpider9)
+process.start()
